@@ -32,10 +32,17 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
-
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.jdbcAuthentication().dataSource(dataSource);
+        auth.jdbcAuthentication().dataSource(dataSource)
+                .usersByUsernameQuery("select naam as username, paswoord as password, actief as enabled" +
+                        " from gebruikers where naam = ?")
+                .authoritiesByUsernameQuery("select gebruikers.naam as username, rollen.naam as authorities" +
+                        " from gebruikers inner join gebruikersrollen" +
+                        " on gebruikers.id = gebruikersrollen.gebruikerid" +
+                        " inner join rollen" +
+                        " on rollen.id = gebruikersrollen.rolid" +
+                        " where gebruikers.naam = ?");
     }
 
     @Override
@@ -48,7 +55,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.logout(logout->logout.logoutSuccessUrl("/"));
+        http.logout(logout -> logout.logoutSuccessUrl("/"));
         http.formLogin(login -> login.loginPage("/login"));
         http.authorizeRequests(requests -> requests
                 .mvcMatchers("/offertes").hasAuthority(MANAGER)
