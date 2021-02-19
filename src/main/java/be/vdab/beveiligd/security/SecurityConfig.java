@@ -34,7 +34,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.logout();
+        http.logout(logout->logout.logoutSuccessUrl("/"));
         http.formLogin(login -> login.loginPage("/login"));
         http.authorizeRequests(requests -> requests
                 .mvcMatchers("/offertes").hasAuthority(MANAGER)
